@@ -10,7 +10,7 @@ const SORT_BY_OPTIONS = [
     '\u21e3 transmitterId'
 ];
 const SIGNATURE_SEPARATOR = '/';
-const DIRACT_PACKET_SIGNATURE = 'ff830501';
+const DIRACT_PACKET_SIGNATURE = 'ff830502';
 const DIRACT_PACKET_SIGNATURE_OFFSET = 24;
 
 // DOM elements
@@ -310,17 +310,14 @@ function parseDirActPacket(packet) {
   let frameLength = parseInt(data.substr(2,2), 16) & 0x1f;
 
   diract.cyclicCount = parseInt(data.substr(2,1), 16) >> 1;
-  diract.instanceId = data.substr(4,8);
-  diract.acceleration = [];
-  diract.acceleration.push(toAcceleration(data.substr(12,2), true));
-  diract.acceleration.push(toAcceleration(data.substr(13,2), false));
-  diract.acceleration.push(toAcceleration(data.substr(15,2), true));
-  diract.batteryPercentage = toBatteryPercentage(data.substr(16,2));
+  diract.instanceId = '';
+  diract.acceleration = [0, 0, 0];
+  diract.batteryPercentage = toBatteryPercentage(data.substr(4,2));
   diract.nearest = [];
 
-  for(nearestIndex = 9; nearestIndex < (frameLength + 2); nearestIndex += 5) {
-    let instanceId = data.substr(nearestIndex * 2, 8);
-    let rssi = toRssi(data.substr(nearestIndex * 2 + 8, 2));
+  for(nearestIndex = 3; nearestIndex < (frameLength + 2); nearestIndex += 3) {
+    let instanceId = data.substr((1 + nearestIndex) * 2, 4);
+    let rssi = toRssi(data.substr(nearestIndex * 2, 2));
     diract.nearest.push( { instanceId: instanceId, rssi: rssi } );
   }
 
